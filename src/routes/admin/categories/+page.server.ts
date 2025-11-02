@@ -3,9 +3,22 @@ import { categories } from '$lib/server/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 import { fail, type Actions } from '@sveltejs/kit';
+import { executeWithRetry } from '$lib/server/db-helper';
 
 export const load: PageServerLoad = async () => {
-	const data = await db.select().from(categories).orderBy(desc(categories.created_at));
+	const data = await executeWithRetry(() =>
+		db.query.categories.findMany({
+			orderBy: desc(categories.created_at),
+			with: {
+				prescriptions: {
+					columns: {
+						id: true
+					}
+				}
+			}
+		})
+	);
+
 	return {
 		categories: data
 	};

@@ -6,7 +6,11 @@ export const categories = pgTable('categories', {
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
 	name: text('name').notNull(),
-	slug: text('slug').notNull(),
+	slug: text('slug').unique().notNull(),
+	desc: text('desc').notNull(),
+	bg_color: text('bg_color').notNull().default('bg-primary'),
+	bg_secondary_color: text('bg_secondary_color').notNull().default('bg-primary/20'),
+	border_color: text('border_color').notNull().default('border-primary'),
 	created_at: timestamp().defaultNow().notNull()
 });
 

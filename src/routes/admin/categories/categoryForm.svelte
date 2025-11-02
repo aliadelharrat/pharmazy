@@ -2,20 +2,33 @@
 	import { enhance } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
 	import * as Field from '$lib/components/ui/field/index.js';
+	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { paths } from '$lib/paths';
-	import slugify from 'slugify';
+	import { slugifyText } from '$lib/utils/slugify-slug';
 	import { toast } from 'svelte-sonner';
 
-	const { title, desc, submit, nameValue } = $props<{
+	import { getColor, getColorByBorder, tailwindColors } from '$lib/utils/tailwind-colors';
+
+	const { title, desc, submit, category } = $props<{
 		title: string;
 		desc: string;
 		submit: string;
-		nameValue?: string;
+		category?: {
+			id: string;
+			name: string;
+			slug: string;
+			desc: string;
+			bg_color: string;
+			bg_secondary_color: string;
+			border_color: string;
+			created_at: Date;
+		};
 	}>();
 
-	let name = $state(nameValue || '');
-	let slug = $derived.by(() => slugify(name, { lower: true, strict: true }));
+	let name = $state(category?.name || '');
+	let slug = $derived.by(() => slugifyText(name));
+	let selectedColor = $state(getColorByBorder(category?.border_color).name);
 </script>
 
 <form
@@ -23,9 +36,9 @@
 	use:enhance={() => {
 		return ({ result }) => {
 			if (result.type === 'failure') {
-				toast.error(result.data?.message || 'Something went wrong');
+				toast.error((result.data?.message as string) || 'Failed');
 			} else if (result.type === 'success') {
-				toast.success(result.data?.message);
+				toast.success((result.data?.message as string) || 'Success');
 				if (result.data?.clearForm) {
 					name = '';
 				}
@@ -48,17 +61,40 @@
 					bind:value={name}
 				/>
 			</Field.Field>
+
+			<input type="hidden" name="slug" value={slug} />
+
 			<Field.Field>
-				<Field.Label for="slug">Slug</Field.Label>
+				<Field.Label for="desc">Description</Field.Label>
 				<Input
-					name="slug"
-					id="slug"
+					name="desc"
+					id="desc"
 					autocomplete="off"
-					placeholder="Enter slug"
-					readonly
-					value={slug}
+					placeholder="Enter description"
+					defaultValue={category?.desc}
 				/>
 			</Field.Field>
+
+			<Field.Field>
+				<input type="hidden" name="color_name" value={selectedColor} />
+				<Field.Label for="bg_color">Color</Field.Label>
+				<RadioGroup.Root class="grid grid-cols-12" bind:value={selectedColor}>
+					{#each tailwindColors as color}
+						<label for={color.name} class="cursor-pointer">
+							<div
+								class={`${color.bg} size-10 rounded-full border-2 transition-all ${
+									selectedColor === color.name
+										? 'border-white ring-2 ring-gray-900 ring-offset-2'
+										: 'border-transparent hover:border-white'
+								}`}
+							>
+								<RadioGroup.Item class="hidden" value={color.name} id={color.name} />
+							</div>
+						</label>
+					{/each}
+				</RadioGroup.Root>
+			</Field.Field>
+
 			<Field.Field orientation="responsive">
 				<Button type="submit">{submit}</Button>
 				<Button href={paths.admin.categories.dashboard} variant="outline">Cancel</Button>

@@ -1,11 +1,15 @@
 export const paths = {
 	home: '/',
 	dashboard: '/dashboard',
-	prescription: (/** @type {string} */ id) => {
-		return `/prescription/${id}`;
+	prescriptions: {
+		show: (/** @type {string} */ id) => {
+			return `/prescriptions/${id}`;
+		}
 	},
-	category: (/** @type {string} */ slug) => {
-		return `/category/${slug}`;
+	categories: {
+		show: (/** @type {string} */ slug) => {
+			return `/categories/${slug}`;
+		}
 	},
 	// Admin routes
 	admin: {

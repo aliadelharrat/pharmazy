@@ -11,6 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Plus, Trash2 } from '@lucide/svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { tick } from 'svelte';
 
 	type Category = {
 		id: string;
@@ -19,17 +20,23 @@
 		created_at: Date;
 	};
 
-	const { title, desc, submit, categories, oldImageUrl, oldDrugs, oldCategoryId } = $props<{
-		title: string;
-		desc: string;
-		submit: string;
-		categories: Category[];
-		oldImageUrl?: string;
-		oldDrugs?: string[];
-		oldCategoryId?: string;
-	}>();
+	const { title, desc, submit, categories, oldImageUrl, oldDrugs, oldCategoryId, cancelUrl } =
+		$props<{
+			title: string;
+			desc: string;
+			submit: string;
+			categories: Category[];
+			oldImageUrl?: string;
+			oldDrugs?: string[];
+			oldCategoryId?: string;
+			cancelUrl: string;
+		}>();
 
 	let imageUrl = $state(oldImageUrl ?? '');
+
+	function removeImageUrl() {
+		imageUrl = '';
+	}
 
 	let drugs = $state<{ id: string; value: string }[]>(
 		oldDrugs && oldDrugs.length
@@ -111,73 +118,107 @@
 			}
 		];
 	}
+
+	let refs: HTMLInputElement[] = [];
+
+	async function handleKeydown(e: KeyboardEvent, i: number) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			addItem();
+			await tick(); // first DOM update
+			await tick(); // ensure refs[] updated
+
+			const next = refs[i + 1];
+			if (next instanceof HTMLInputElement) next.focus();
+		}
+	}
 </script>
 
-<form method="POST" use:enhance={handleSubmit} class="mx-auto max-w-xl">
+<form method="POST" use:enhance={handleSubmit}>
 	<Field.Set>
 		<Field.Legend>{title}</Field.Legend>
 		<Field.Description>{desc}</Field.Description>
+
 		<Field.Group>
-			<Field.Field>
-				<div class="grid w-full max-w-sm items-center gap-4">
-					<Label for="imageUrl">Prescription image</Label>
-					<Input id="imageUrl" type="file" onchange={selectFile} />
-					<input type="hidden" name="imageUrl" value={imageUrl} />
+			<section class="grid grid-cols-2 gap-10">
+				<div class="flex-1">
+					<Field.Field class={imageUrl && 'hidden'}>
+						<div class="grid w-full max-w-sm items-center gap-4">
+							<Label for="imageUrl">Prescription image</Label>
+							<Input id="imageUrl" type="file" onchange={selectFile} />
+							<input type="hidden" name="imageUrl" value={imageUrl} />
+						</div>
+					</Field.Field>
+
+					{#if imageUrl}
+						<div class="relative">
+							<Field.Field>
+								<img src={imageUrl} alt="prescription" class="w-full rounded-xl object-cover" />
+							</Field.Field>
+
+							<div class="absolute top-5 right-5">
+								<Button onclick={removeImageUrl} variant="destructive" size="icon-lg">
+									<Trash2 />
+								</Button>
+							</div>
+						</div>
+					{/if}
 				</div>
-			</Field.Field>
 
-			{#if imageUrl}
-				<Field.Field>
-					<img src={imageUrl} alt="prescription" />
-				</Field.Field>
-			{/if}
+				<div class="flex-1 space-y-5">
+					<Field.Field>
+						<Field.Label for="name">Drugs</Field.Label>
+						<input type="hidden" name="drugs" value={drugsString} />
 
-			<Field.Field>
-				<Field.Label for="name">Drugs</Field.Label>
-				<input type="hidden" name="drugs" value={drugsString} />
-				{#each drugs as drug (drug.id)}
-					{@const lastDrug = drugs[drugs.length - 1]}
+						{#each drugs as drug, i (drug.id)}
+							{@const lastDrug = drugs[drugs.length - 1]}
 
-					<div class="flex items-center gap-2">
-						<Button variant="destructive" onclick={() => deleteItem(drug.id)}>
-							<Trash2 />
-						</Button>
-						<Input
-							name={`name-${drug.id}`}
-							id={`id-${drug.id}`}
-							autocomplete="off"
-							placeholder="Enter drug name"
-							bind:value={drug.value}
-						/>
+							<div class="flex items-center gap-2">
+								<Input
+									name={`name-${drug.id}`}
+									id={`id-${drug.id}`}
+									autocomplete="on"
+									placeholder="Enter drug name"
+									bind:value={drug.value}
+									onkeydown={(e) => handleKeydown(e, i)}
+								/>
 
-						{#if drug.id === lastDrug.id}
-							<Button variant="outline" onclick={addItem}>
-								<Plus />
-							</Button>
-						{/if}
-					</div>
-				{/each}
-			</Field.Field>
+								<Button size="icon-sm" variant="ghost" onclick={() => deleteItem(drug.id)}>
+									<Trash2 />
+								</Button>
+							</div>
 
-			<Field.Field>
-				<Field.Label for="category">Category</Field.Label>
-
-				<Select.Root type="single" name="category" bind:value={categoryValue}>
-					<Select.Trigger class="w-[180px]">
-						{triggerContent}
-					</Select.Trigger>
-					<Select.Content id="category">
-						{#each categories as cat (cat.id)}
-							<Select.Item value={cat.id} label={cat.name}>{cat.name}</Select.Item>
+							{#if drug.id === lastDrug.id}
+								<div>
+									<Button variant="outline" onclick={addItem}>
+										<Plus /> Add new drug
+									</Button>
+								</div>
+							{/if}
 						{/each}
-					</Select.Content>
-				</Select.Root>
-			</Field.Field>
+					</Field.Field>
 
-			<Field.Field orientation="responsive">
-				<Button type="submit">{submit}</Button>
-				<Button href={paths.admin.prescriptions.dashboard} variant="outline">Cancel</Button>
-			</Field.Field>
+					<Field.Field>
+						<Field.Label for="category">Category</Field.Label>
+
+						<Select.Root type="single" name="category" bind:value={categoryValue}>
+							<Select.Trigger class="w-[180px]">
+								{triggerContent}
+							</Select.Trigger>
+							<Select.Content id="category">
+								{#each categories as cat (cat.id)}
+									<Select.Item value={cat.id} label={cat.name}>{cat.name}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					</Field.Field>
+
+					<Field.Field orientation="responsive">
+						<Button type="submit">{submit}</Button>
+						<Button href={cancelUrl} variant="outline">Cancel</Button>
+					</Field.Field>
+				</div>
+			</section>
 		</Field.Group>
 	</Field.Set>
 </form>

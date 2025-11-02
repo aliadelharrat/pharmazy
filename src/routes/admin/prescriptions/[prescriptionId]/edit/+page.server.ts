@@ -35,7 +35,7 @@ export const actions = {
 
 		const form = await request.formData();
 		const imageUrl = form.get('imageUrl')?.toString() || '';
-		const drugs = form.get('drugs')?.toString() || '';
+		const drugs = form.get('drugs')?.toString().toUpperCase() || '';
 		const drugsArray = JSON.parse(drugs) as string[];
 		const categoryId = form.get('category')?.toString() || '';
 

@@ -4,12 +4,19 @@
 	import { formatDate } from '$lib/utils/format-date';
 	import { Button } from '$lib/components/ui/button';
 	import { paths } from '$lib/paths';
+	import { PUBLIC_ADMIN_TITLE } from '$env/static/public';
 
 	const { data }: PageProps = $props();
 	const { id, authorId, created_at, views, category } = data.prescription;
 </script>
 
-<section class="mx-auto flex max-w-4xl items-start gap-10">
+<svelte:head>
+	<title>
+		View prescription | {PUBLIC_ADMIN_TITLE}
+	</title>
+</svelte:head>
+
+<section class="flex items-start gap-10">
 	<div class="w-sm flex-1 overflow-hidden rounded-xl">
 		<img class="size-full object-cover" src={data.prescription.imageUrl} alt="prescription" />
 	</div>
@@ -39,10 +46,10 @@
 			</Card.Footer>
 		</Card.Root>
 
-		<div class="flex gap-5">
-			<Button href={paths.admin.prescriptions.edit(id)} variant="outline" class="flex-1"
-				>Edit</Button
-			>
+		<div class="flex justify-end gap-5 *:grow-0">
+			<Button href={paths.admin.prescriptions.edit(id)} variant="outline" class="flex-1">
+				Edit
+			</Button>
 			<Button variant="outline" class="flex-1">Solve</Button>
 		</div>
 	</div>

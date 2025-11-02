@@ -7,8 +7,16 @@
 	import type { PageProps } from './$types';
 	import { invalidateAll } from '$app/navigation';
 	import EmptyState from '$lib/components/admin/empty-state.svelte';
+	import { PUBLIC_ADMIN_TITLE } from '$env/static/public';
+	import { Gem, Hand, Layers, Layers2Icon, Pen, StickyNote, Trash2 } from '@lucide/svelte';
 	const { data }: PageProps = $props();
 </script>
+
+<svelte:head>
+	<title>
+		Categories | {PUBLIC_ADMIN_TITLE}
+	</title>
+</svelte:head>
 
 {#if data.categories.length === 0}
 	<EmptyState
@@ -28,19 +36,36 @@
 		<Table.Root>
 			<Table.Header>
 				<Table.Row>
-					<Table.Head>Name</Table.Head>
-					<Table.Head>Slug</Table.Head>
+					<Table.Head></Table.Head>
+					<Table.Head class="text-xs text-muted-foreground">Name & Description</Table.Head>
+					<Table.Head title="Number of prescriptions">
+						<Layers2Icon class="size-4 text-muted-foreground" />
+					</Table.Head>
 					<Table.Head></Table.Head>
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
 				{#each data.categories as cat}
 					<Table.Row>
-						<Table.Cell>{cat.name}</Table.Cell>
-						<Table.Cell>{cat.slug}</Table.Cell>
+						<Table.Cell>
+							<div class="flex items-center justify-center">
+								<div class={`flex size-9 items-center justify-center rounded-full ${cat.bg_color}`}>
+									<Layers class="size-5" />
+								</div>
+							</div>
+						</Table.Cell>
+						<Table.Cell class="flex flex-col gap-1">
+							<p>{cat.name}</p>
+							<p class="text-xs text-muted-foreground">
+								{cat.desc.slice(0, 30)}{cat.desc.length > 30 ? '...' : ''}
+							</p>
+						</Table.Cell>
+						<Table.Cell class="text-md font-bold">
+							{cat.prescriptions.length}
+						</Table.Cell>
 						<Table.Cell class="space-x-2 text-right">
 							<Button size="sm" href={paths.admin.categories.edit(cat.id)} variant="outline">
-								Edit
+								<Pen />
 							</Button>
 
 							<form
@@ -61,7 +86,9 @@
 								}}
 							>
 								<input type="hidden" name="id" value={cat.id} />
-								<Button type="submit" size="sm" variant="destructive">Delete</Button>
+								<Button type="submit" size="sm" variant="destructive">
+									<Trash2 />
+								</Button>
 							</form>
 						</Table.Cell>
 					</Table.Row>

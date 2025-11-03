@@ -7,9 +7,15 @@ export const paths = {
 		}
 	},
 	categories: {
+		dashboard: '/dashboard',
 		show: (/** @type {string} */ slug) => {
 			return `/categories/${slug}`;
 		}
+	},
+	// Auth routes
+	auth: {
+		register: '/register',
+		login: '/login'
 	},
 	// Admin routes
 	admin: {

@@ -8,7 +8,7 @@
 	import { slugifyText } from '$lib/utils/slugify-slug';
 	import { toast } from 'svelte-sonner';
 
-	import { getColor, getColorByBorder, tailwindColors } from '$lib/utils/tailwind-colors';
+	import { getColorByBorder, tailwindColors } from '$lib/utils/tailwind-colors';
 
 	const { title, desc, submit, category } = $props<{
 		title: string;

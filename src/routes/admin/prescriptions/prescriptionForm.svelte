@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { enhance } from '$app/forms';
-	import { paths } from '$lib/paths';
 	import { createUploadThing } from '$lib/utils/uploadthing';
 	import { Button } from '$lib/components/ui/button';
 	import * as Field from '$lib/components/ui/field/index.js';

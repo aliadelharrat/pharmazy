@@ -5,11 +5,8 @@
 	import { PUBLIC_SITE_TITLE } from '$env/static/public';
 	import { paths } from '$lib/paths';
 	import { authClient } from '$lib/auth-client';
-
 	let { data }: PageProps = $props();
-
 	const session = authClient.useSession();
-	console.log($session.data);
 </script>
 
 <svelte:head>

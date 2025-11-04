@@ -2,6 +2,7 @@ export const paths = {
 	home: '/',
 	dashboard: '/dashboard',
 	prescriptions: {
+		dashboard: '/prescriptions',
 		show: (/** @type {string} */ id) => {
 			return `/prescriptions/${id}`;
 		}

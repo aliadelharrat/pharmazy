@@ -6,6 +6,8 @@
 	import { Button } from './ui/button';
 
 	const session = authClient.useSession();
+
+	const { loggedInUser } = $props();
 </script>
 
 <header class="container mx-auto flex items-center gap-10 py-5">
@@ -17,26 +19,26 @@
 		<ul class="flex items-center gap-6">
 			<li>
 				<a class="text-muted-foreground hover:text-foreground" href={paths.categories.dashboard}>
-					Categories
+					Play Now
 				</a>
 			</li>
 
-			<li><a class="text-muted-foreground hover:text-foreground" href="/">Contributres</a></li>
+			<li><a class="text-muted-foreground hover:text-foreground" href="/">Leaderboard</a></li>
 
 			<li>
-				<a class="text-muted-foreground hover:text-foreground" href="/">Contact us</a>
+				<a class="text-muted-foreground hover:text-foreground" href="/">Support</a>
 			</li>
 		</ul>
 	</nav>
 
 	<nav class="ml-auto">
 		<ul class="flex items-center gap-3">
-			{#if $session.data}
+			{#if loggedInUser}
 				<li class="flex shrink-0 items-center gap-0.5 text-sm text-muted-foreground">
 					<User class="size-5" />
-					{$session.data?.user.name}
+					{loggedInUser.name}
 				</li>
-				{#if ($session.data?.user as any)?.role === 'admin' || ($session.data?.user as any)?.role === 'super_admin'}
+				{#if loggedInUser?.role === 'admin' || loggedInUser.role === 'super_admin'}
 					<li>
 						<Button href={paths.admin.dashboard} variant="ghost">Admin</Button>
 					</li>

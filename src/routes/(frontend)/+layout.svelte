@@ -2,11 +2,13 @@
 	import Header from '$lib/components/header.svelte';
 	import { Heart } from '@lucide/svelte';
 	import { PUBLIC_SITE_TITLE } from '$env/static/public';
-	let { children } = $props();
+	import type { LayoutProps } from './$types';
+	let { children, data }: LayoutProps = $props();
+	const { loggedInUser } = data;
 </script>
 
 <div class="flex min-h-dvh flex-col">
-	<Header />
+	<Header {loggedInUser} />
 
 	<main class="container mx-auto flex-1">
 		{@render children()}

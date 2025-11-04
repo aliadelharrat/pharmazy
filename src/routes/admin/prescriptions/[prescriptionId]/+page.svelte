@@ -7,7 +7,7 @@
 	import { PUBLIC_ADMIN_TITLE } from '$env/static/public';
 
 	const { data }: PageProps = $props();
-	const { id, authorId, created_at, views, category } = data.prescription;
+	const { id, created_at, views, category } = data.prescription;
 </script>
 
 <svelte:head>
@@ -28,11 +28,11 @@
 					{category.name}
 				</Card.Title>
 				<Card.Description>
-					Created by {'Adel Harrat'} &mdash; {formatDate(created_at)}
+					Created by Adel Harrat &mdash; {formatDate(created_at)}
 				</Card.Description>
 			</Card.Header>
 			<Card.Content class="space-y-4 py-5">
-				{#each data.prescription.drugs as drug, index}
+				{#each data.prescription.drugs as drug, index (index)}
 					<p class="text-2xl font-semibold uppercase">
 						{index + 1}. {drug}
 					</p>
@@ -50,7 +50,9 @@
 			<Button href={paths.admin.prescriptions.edit(id)} variant="outline" class="flex-1">
 				Edit
 			</Button>
-			<Button variant="outline" class="flex-1">Solve</Button>
+			<Button target="_blank" href={paths.prescriptions.show(id)} variant="outline" class="flex-1"
+				>Solve</Button
+			>
 		</div>
 	</div>
 </section>

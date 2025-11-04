@@ -21,12 +21,26 @@ export async function handle({ event, resolve }) {
 
 	const pathname = event.url.pathname;
 
+	// const super_public_paths = ['/api/uploadthing', '/favicon.ico'];
+	// if (super_public_paths.includes(pathname)) {
+	// 	return svelteKitHandler({ event, resolve, auth, building });
+	// }
+
 	// --- Define which routes are public ---
 	const publicPaths = [paths.auth.login, paths.auth.register];
 
 	// --- Redirect logged-in users away from auth pages ---
 	if (publicPaths.includes(pathname) && session?.user) {
 		throw redirect(302, paths.dashboard);
+	}
+
+	if (
+		(pathname.startsWith('/dashboard') ||
+			pathname.startsWith('/categories') ||
+			pathname.startsWith('/prescriptions')) &&
+		!session?.user
+	) {
+		return redirect(302, paths.auth.login);
 	}
 
 	// --- Restrict /admin pages to admin or super_admin ---
@@ -37,11 +51,11 @@ export async function handle({ event, resolve }) {
 		throw redirect(302, paths.auth.login);
 	}
 
-	// --- Lock down all other pages (must be logged in) ---
-	const isPublic = publicPaths.some((p) => pathname.startsWith(p));
-	if (!isPublic && !session?.user) {
-		throw redirect(302, paths.auth.login);
-	}
+	// // --- Lock down all other pages (must be logged in) ---
+	// const isPublic = publicPaths.some((p) => pathname.startsWith(p));
+	// if (!isPublic && !session?.user) {
+	// 	throw redirect(302, paths.auth.login);
+	// }
 
 	// Continue normally
 	return svelteKitHandler({ event, resolve, auth, building });
